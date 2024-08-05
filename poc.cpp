@@ -8,10 +8,7 @@
 
 import vaselin;
 
-struct init {
-  init();
-} i;
-init::init() { 
+int main() {
   fprintf(stdout, "stdout\n");
   fprintf(stderr, "stderr\n");
 }

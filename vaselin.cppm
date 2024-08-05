@@ -15,6 +15,7 @@ import hai;
 
 IMPORT(void, leco, console_error)(const char *, int);
 IMPORT(void, leco, console_log)(const char *, int);
+IMPORT(void, leco, set_timeout)(void (*)(), int);
 
 VASI(fd_close)(int fd) { return __WASI_ERRNO_SUCCESS; }
 
@@ -62,3 +63,11 @@ VASI(fd_write)
 
   return __WASI_ERRNO_SUCCESS;
 }
+
+int main();
+static void run_main() { main(); }
+struct vaselin {
+  vaselin() {
+    set_timeout(run_main, 0);
+  }
+} i;
