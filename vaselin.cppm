@@ -18,6 +18,8 @@ IMPORT(void, leco, console_log)(const char *, int);
 
 VASI(fd_close)(int fd) { return __WASI_ERRNO_SUCCESS; }
 
+VASI(fd_seek)(int fd) { return __WASI_ERRNO_ACCES; }
+
 VASI(fd_fdstat_get)(int fd, __wasi_fdstat_t *stat) {
   if (fd != 1 && fd != 2)
     return __WASI_ERRNO_BADF;
