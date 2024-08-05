@@ -19,7 +19,11 @@ IMPORT(void, leco, set_timeout)(void (*)(), int);
 
 VASI(fd_close)(int fd) { return __WASI_ERRNO_SUCCESS; }
 
-VASI(fd_seek)(int fd) { return __WASI_ERRNO_ACCES; }
+VASI(fd_seek)
+(int fd, __wasi_filedelta_t offset, __wasi_whence_t whence,
+ __wasi_filesize_t *ret) {
+  return __WASI_ERRNO_ACCES;
+}
 
 VASI(fd_fdstat_get)(int fd, __wasi_fdstat_t *stat) {
   if (fd != 1 && fd != 2)
@@ -67,7 +71,5 @@ VASI(fd_write)
 int main();
 static void run_main() { main(); }
 struct vaselin {
-  vaselin() {
-    set_timeout(run_main, 0);
-  }
+  vaselin() { set_timeout(run_main, 0); }
 } i;
