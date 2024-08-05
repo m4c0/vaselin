@@ -5,6 +5,7 @@
   leco_imports.vaselin = {
     console_error : (ptr, size) => console.error(new TextDecoder().decode(arr(ptr, size))),
     console_log : (ptr, size) => console.log(new TextDecoder().decode(arr(ptr, size))),
+    date_now : () => BigInt(Date.now()),
     request_animation_frame : (fn) => window.requestAnimationFrame(ifn(fn)),
     set_timeout : (fn, timeout) => setTimeout(ifn(fn), timeout),
   };

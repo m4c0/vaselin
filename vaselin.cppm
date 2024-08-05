@@ -16,9 +16,20 @@ import hai;
 export namespace vaselin {
 IMPORT(void, console_error)(const char *, int);
 IMPORT(void, console_log)(const char *, int);
+IMPORT(__wasi_timestamp_t, date_now)();
 IMPORT(void, request_animation_frame)(void (*)());
 IMPORT(void, set_timeout)(void (*)(), int);
 } // namespace vaselin
+
+VASI(clock_time_get)(
+    __wasi_clockid_t id,
+    __wasi_timestamp_t precision,
+    __wasi_timestamp_t *ret
+    ) {
+  if (id != 0) return __WASI_ERRNO_ACCES;
+  *ret = vaselin::date_now() * 1000000;
+  return __WASI_ERRNO_SUCCESS;
+}
 
 VASI(fd_close)(int fd) { return __WASI_ERRNO_SUCCESS; }
 
