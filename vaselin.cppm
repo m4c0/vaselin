@@ -9,15 +9,15 @@ export module vaselin;
 
 import hai;
 
-#define IMPORT(R, M, N)                                                        \
-  extern "C" [[clang::import_module(#M), clang::import_name(#N)]] R N
+#define IMPORT(R, N)                                                        \
+  extern "C" [[clang::import_module("vaselin"), clang::import_name(#N)]] R N
 #define VASI(N) extern "C" int __imported_wasi_snapshot_preview1_##N
 
 export namespace vaselin {
-IMPORT(void, leco, console_error)(const char *, int);
-IMPORT(void, leco, console_log)(const char *, int);
-IMPORT(void, leco, request_animation_frame)(void (*)());
-IMPORT(void, leco, set_timeout)(void (*)(), int);
+IMPORT(void, console_error)(const char *, int);
+IMPORT(void, console_log)(const char *, int);
+IMPORT(void, request_animation_frame)(void (*)());
+IMPORT(void, set_timeout)(void (*)(), int);
 } // namespace vaselin
 
 VASI(fd_close)(int fd) { return __WASI_ERRNO_SUCCESS; }
