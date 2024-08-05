@@ -9,20 +9,16 @@ export module vaselin;
 
 import hai;
 
-extern "C"
-    [[clang::import_module("leco"), clang::import_name("console_log")]] void
-    console_log(const char *, int);
-extern "C"
-    [[clang::import_module("leco"), clang::import_name("console_error")]] void
-    console_error(const char *, int);
+#define IMPORT(R, M, N)                                                        \
+  extern "C" [[clang::import_module(#M), clang::import_name(#N)]] R N
+#define VASI(N) extern "C" int __imported_wasi_snapshot_preview1_##N
 
-extern "C" int
-__imported_wasi_snapshot_preview1_fd_close(int fd) {
-  return __WASI_ERRNO_SUCCESS;
-}
+IMPORT(void, leco, console_error)(const char *, int);
+IMPORT(void, leco, console_log)(const char *, int);
 
-extern "C" int
-__imported_wasi_snapshot_preview1_fd_fdstat_get(int fd, __wasi_fdstat_t *stat) {
+VASI(fd_close)(int fd) { return __WASI_ERRNO_SUCCESS; }
+
+VASI(fd_fdstat_get)(int fd, __wasi_fdstat_t *stat) {
   if (fd != 1 && fd != 2)
     return __WASI_ERRNO_BADF;
 
@@ -33,10 +29,8 @@ __imported_wasi_snapshot_preview1_fd_fdstat_get(int fd, __wasi_fdstat_t *stat) {
   return __WASI_ERRNO_SUCCESS;
 }
 
-extern "C" int
-__imported_wasi_snapshot_preview1_fd_write(int fd, const __wasi_ciovec_t *iovs,
-                                           size_t iovs_len,
-                                           __wasi_size_t *written) {
+VASI(fd_write)
+(int fd, const __wasi_ciovec_t *iovs, size_t iovs_len, __wasi_size_t *written) {
   if (fd != 1 && fd != 2)
     return __WASI_ERRNO_BADF;
 
@@ -66,5 +60,3 @@ __imported_wasi_snapshot_preview1_fd_write(int fd, const __wasi_ciovec_t *iovs,
 
   return __WASI_ERRNO_SUCCESS;
 }
-
-
