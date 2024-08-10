@@ -31,8 +31,6 @@ VASI(clock_time_get)(
   return __WASI_ERRNO_SUCCESS;
 }
 
-VASI(fd_close)(int fd) { return __WASI_ERRNO_SUCCESS; }
-
 VASI(fd_seek)
 (int fd, __wasi_filedelta_t offset, __wasi_whence_t whence,
  __wasi_filesize_t *ret) {
