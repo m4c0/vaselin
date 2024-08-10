@@ -16,6 +16,8 @@ import hai;
 export namespace vaselin {
 IMPORT(void, console_error)(const char *, int);
 IMPORT(void, console_log)(const char *, int);
+IMPORT(int, preopen_name_len)(int);
+IMPORT(int, preopen_name_copy)(int, uint8_t *, int);
 IMPORT(__wasi_timestamp_t, date_now)();
 IMPORT(void, request_animation_frame)(void (*)());
 IMPORT(void, set_timeout)(void (*)(), int);
@@ -38,14 +40,38 @@ VASI(fd_seek)
 }
 
 VASI(fd_fdstat_get)(int fd, __wasi_fdstat_t *stat) {
-  if (fd != 1 && fd != 2)
-    return __WASI_ERRNO_BADF;
+  if (fd != 1 && fd != 2) {
+    stat->fs_filetype = __WASI_FILETYPE_REGULAR_FILE;
+    stat->fs_flags = 0;
+    stat->fs_rights_base = __WASI_RIGHTS_FD_READ;
+    stat->fs_rights_inheriting = __WASI_RIGHTS_FD_READ;
+    return __WASI_ERRNO_SUCCESS;
+  }
 
   stat->fs_filetype = __WASI_FILETYPE_CHARACTER_DEVICE;
   stat->fs_flags = __WASI_FDFLAGS_APPEND;
   stat->fs_rights_base = __WASI_RIGHTS_FD_WRITE;
   stat->fs_rights_inheriting = __WASI_RIGHTS_FD_WRITE;
   return __WASI_ERRNO_SUCCESS;
+}
+
+VASI(fd_prestat_get)(int fd, __wasi_prestat_t * ret) {
+  if (fd < 3) return __WASI_ERRNO_ACCES;
+
+  auto len = vaselin::preopen_name_len(fd - 3);
+  if (len == 0) return __WASI_ERRNO_BADF;
+
+  ret->tag = 0;
+  ret->u.dir.pr_name_len = len;
+  return __WASI_ERRNO_SUCCESS;
+}
+VASI(fd_prestat_dir_name)(int fd, uint8_t * path, unsigned path_len) {
+  if (fd == 3) {
+    vaselin::preopen_name_copy(fd - 3, path, path_len);
+    return __WASI_ERRNO_SUCCESS;
+  }
+
+  return __WASI_ERRNO_BADF;
 }
 
 VASI(fd_write)
