@@ -118,6 +118,12 @@ VASI(fd_write)
   return __WASI_ERRNO_SUCCESS;
 }
 
+VASI(path_open)(int dir_fd, __wasi_lookupflags_t, const char * path, unsigned len, __wasi_oflags_t oflags, __wasi_rights_t base, __wasi_rights_t inh, __wasi_fdflags_t fdflags, int * ret) {
+  auto p = jute::view{path, len};
+  err(p);
+  return __WASI_ERRNO_ACCES;
+}
+
 int main();
 static void run_main() { main(); }
 namespace vaselin {
