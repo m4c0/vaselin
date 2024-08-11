@@ -25,6 +25,8 @@ export namespace vaselin {
 
 static constexpr const auto read_rights = __WASI_RIGHTS_FD_READ;
 
+static hai::varray<int> open_fds{16};
+
 static void err(jute::view msg) { vaselin::console_error(msg.begin(), msg.size()); }
 
 VASI(clock_time_get)(__wasi_clockid_t id, __wasi_timestamp_t precision, __wasi_timestamp_t * ret) {
@@ -105,9 +107,9 @@ VASI(path_open)
   if (base != read_rights || inh != read_rights) return __WASI_ERRNO_ACCES;
   if (fdflags != 0) return __WASI_ERRNO_ACCES;
 
-  auto p = jute::view { path, len };
-  err(p);
-  return __WASI_ERRNO_ACCES;
+  *ret = open_fds.size() + 4;
+  open_fds.push_back(0);
+  return __WASI_ERRNO_SUCCESS;
 }
 
 int main();
