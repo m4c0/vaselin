@@ -8,6 +8,7 @@ module;
 export module vaselin;
 
 import hai;
+import jute;
 
 #define IMPORT(R, N)                                                        \
   extern "C" [[clang::import_module("vaselin"), clang::import_name(#N)]] R N
@@ -22,6 +23,10 @@ IMPORT(__wasi_timestamp_t, date_now)();
 IMPORT(void, request_animation_frame)(void (*)());
 IMPORT(void, set_timeout)(void (*)(), int);
 } // namespace vaselin
+
+static void err(jute::view msg) {
+  vaselin::console_error(msg.begin(), msg.size());
+}
 
 VASI(clock_time_get)(
     __wasi_clockid_t id,
@@ -40,38 +45,45 @@ VASI(fd_seek)
 }
 
 VASI(fd_fdstat_get)(int fd, __wasi_fdstat_t *stat) {
-  if (fd != 1 && fd != 2) {
-    stat->fs_filetype = __WASI_FILETYPE_REGULAR_FILE;
-    stat->fs_flags = 0;
-    stat->fs_rights_base = __WASI_RIGHTS_FD_READ;
-    stat->fs_rights_inheriting = __WASI_RIGHTS_FD_READ;
-    return __WASI_ERRNO_SUCCESS;
+  switch (fd) {
+    case 1: // stdout
+    case 2: // stderr
+      stat->fs_filetype = __WASI_FILETYPE_CHARACTER_DEVICE;
+      stat->fs_flags = __WASI_FDFLAGS_APPEND;
+      stat->fs_rights_base = __WASI_RIGHTS_FD_WRITE;
+      stat->fs_rights_inheriting = __WASI_RIGHTS_FD_WRITE;
+      return __WASI_ERRNO_SUCCESS;
+    case 3: // "root dir" (prestat'd)
+      *stat = { .fs_filetype = __WASI_FILETYPE_DIRECTORY };
+      return __WASI_ERRNO_SUCCESS;
+    default:
+      err("fdstat_get: unknown FD");
+      return __WASI_ERRNO_BADF;
   }
-
-  stat->fs_filetype = __WASI_FILETYPE_CHARACTER_DEVICE;
-  stat->fs_flags = __WASI_FDFLAGS_APPEND;
-  stat->fs_rights_base = __WASI_RIGHTS_FD_WRITE;
-  stat->fs_rights_inheriting = __WASI_RIGHTS_FD_WRITE;
-  return __WASI_ERRNO_SUCCESS;
 }
 
 VASI(fd_prestat_get)(int fd, __wasi_prestat_t * ret) {
-  if (fd < 3) return __WASI_ERRNO_ACCES;
-
-  auto len = vaselin::preopen_name_len(fd - 3);
-  if (len == 0) return __WASI_ERRNO_BADF;
-
-  ret->tag = 0;
-  ret->u.dir.pr_name_len = len;
-  return __WASI_ERRNO_SUCCESS;
+  switch (fd) {
+    case 3:
+      ret->tag = 0;
+      ret->u.dir.pr_name_len = 1;
+      return __WASI_ERRNO_SUCCESS;
+    case 4: // expected
+      return __WASI_ERRNO_BADF;
+    default:
+      err("fd_prestat_get: unknown FD");
+      return __WASI_ERRNO_BADF;
+  }
 }
 VASI(fd_prestat_dir_name)(int fd, uint8_t * path, unsigned path_len) {
-  if (fd == 3) {
-    vaselin::preopen_name_copy(fd - 3, path, path_len);
-    return __WASI_ERRNO_SUCCESS;
+  switch (fd) {
+    case 3:
+      path[0] = '/';
+      return __WASI_ERRNO_SUCCESS;
+    default:
+      err("fd_prestat_dir_name: unknown FD");
+      return __WASI_ERRNO_BADF;
   }
-
-  return __WASI_ERRNO_BADF;
 }
 
 VASI(fd_write)
