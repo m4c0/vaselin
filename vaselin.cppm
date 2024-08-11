@@ -20,14 +20,18 @@ export namespace vaselin {
   IMPORT(int, open_file)(const char *, int);
   IMPORT(int, preopen_name_len)(int);
   IMPORT(int, preopen_name_copy)(int, uint8_t *, int);
-  IMPORT(int, read_block)(int, void *, int);
+  IMPORT(int, read_block)(int, int, void *, int);
   IMPORT(void, request_animation_frame)(void (*)());
   IMPORT(void, set_timeout)(void (*)(), int);
 } // namespace vaselin
 
 static constexpr const auto read_rights = __WASI_RIGHTS_FD_READ;
 
-static hai::varray<int> open_fds{16};
+struct js_file {
+  int js_fd;
+  int offset;
+};
+static hai::varray<js_file> open_fds{16};
 
 static void err(jute::view msg) { vaselin::console_error(msg.begin(), msg.size()); }
 
@@ -81,12 +85,20 @@ VASI(fd_prestat_dir_name)(int fd, uint8_t * path, unsigned path_len) {
 VASI(fd_read)(int fd, const __wasi_iovec_t * iovs, size_t iovs_len, __wasi_size_t * read) {
   if (fd < 4) return __WASI_ERRNO_BADF;
 
+  auto & [js_fd, offset] = open_fds[fd - 4];
+
   *read = 0UL;
   for (auto i = 0; i < iovs_len; i++) {
     auto len = iovs[i].buf_len;
-    auto r = vaselin::read_block(fd, iovs[i].buf, len);
+    auto r = vaselin::read_block(js_fd, offset, iovs[i].buf, len);
+    if (r < 0) {
+      // TODO: test sequencial read
+      *read = -1;
+      return __WASI_ERRNO_SUCCESS;
+    }
+
     *read += r;
-    if (r < 0 && !*read) *read = -1;
+    offset += r;
     if (r < len) return __WASI_ERRNO_SUCCESS;
   }
 
@@ -125,7 +137,10 @@ VASI(path_open)
   if (fdflags != 0) return __WASI_ERRNO_ACCES;
 
   *ret = open_fds.size() + 4;
-  open_fds.push_back(vaselin::open_file(path, len));
+  open_fds.push_back(js_file {
+    .js_fd = vaselin::open_file(path, len),
+    .offset = 0,
+  });
   return __WASI_ERRNO_SUCCESS;
 }
 
