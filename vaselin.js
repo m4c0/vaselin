@@ -4,7 +4,6 @@ function vaselin_toarr(ptr, size) {
 function vaselin_tostr(ptr, size) {
   return new TextDecoder().decode(vaselin_toarr(ptr, size));
 }
-var vaselin_preopens = [];
 
 (function() {
   function ifn(fn) { return leco_exports.__indirect_function_table.get(fn); }
@@ -25,6 +24,7 @@ var vaselin_preopens = [];
     date_now : () => BigInt(Date.now()),
     preopen_name_len : (idx) => idx >= vaselin_preopens.length ? 0 : vaselin_preopens[idx].length,
     preopen_name_copy : (idx, ptr, sz) => vaselin_toarr(ptr, sz).set(vaselin_preopens[idx]),
+    read_block : (fd, ptr, sz) => 1,
     request_animation_frame : (fn) => window.requestAnimationFrame(ifn(fn)),
     set_timeout : (fn, timeout) => setTimeout(ifn(fn), timeout),
   };

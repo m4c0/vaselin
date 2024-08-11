@@ -14,7 +14,7 @@ int main() {
   fprintf(stdout, "stdout\n");
   fprintf(stderr, "stderr\n");
 
-  auto f = fopen("test", "rb");
+  auto f = fopen("poc.html", "rb");
   if (!f) {
     fprintf(stderr, "%s\n", strerror(errno));
   } else {

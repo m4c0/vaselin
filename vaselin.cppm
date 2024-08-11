@@ -16,9 +16,10 @@ import jute;
 export namespace vaselin {
   IMPORT(void, console_error)(const char *, int);
   IMPORT(void, console_log)(const char *, int);
+  IMPORT(__wasi_timestamp_t, date_now)();
   IMPORT(int, preopen_name_len)(int);
   IMPORT(int, preopen_name_copy)(int, uint8_t *, int);
-  IMPORT(__wasi_timestamp_t, date_now)();
+  IMPORT(int, read_block)(int, void *, int);
   IMPORT(void, request_animation_frame)(void (*)());
   IMPORT(void, set_timeout)(void (*)(), int);
 } // namespace vaselin
@@ -74,6 +75,20 @@ VASI(fd_prestat_dir_name)(int fd, uint8_t * path, unsigned path_len) {
     case 3: path[0] = '/'; return __WASI_ERRNO_SUCCESS;
     default: err("fd_prestat_dir_name: unknown FD"); return __WASI_ERRNO_BADF;
   }
+}
+
+VASI(fd_read)(int fd, const __wasi_iovec_t * iovs, size_t iovs_len, __wasi_size_t * read) {
+  if (fd < 4) return __WASI_ERRNO_BADF;
+
+  *read = 0UL;
+  for (auto i = 0; i < iovs_len; i++) {
+    auto len = iovs[i].buf_len;
+    auto r = vaselin::read_block(fd, iovs[i].buf, len);
+    *read += r;
+    if (r < len) return __WASI_ERRNO_SUCCESS;
+  }
+
+  return __WASI_ERRNO_SUCCESS;
 }
 
 VASI(fd_write)(int fd, const __wasi_ciovec_t * iovs, size_t iovs_len, __wasi_size_t * written) {
