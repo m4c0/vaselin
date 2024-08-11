@@ -99,6 +99,7 @@ VASI(fd_read)(int fd, const __wasi_iovec_t * iovs, size_t iovs_len, __wasi_size_
   for (auto i = 0; i < iovs_len; i++) {
     auto len = iovs[i].buf_len;
     auto r = vaselin::read_block(js_fd, offset, iovs[i].buf, len);
+    if (r == 0) return __WASI_ERRNO_AGAIN;
     if (r < 0) {
       // TODO: test sequencial read
       *read = -1;
