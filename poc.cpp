@@ -10,23 +10,34 @@
 
 import vaselin;
 
+static FILE * f;
+
+// Due to the event-driven nature of JS, we can't do a while loop for reading the file.
+// So we need to treat all IO as "async"
+void try_read() {
+  // TODO: the final </html> is not being printed
+  if (feof(f)) {
+    fclose(f);
+    return;
+  }
+
+  char buf[10]{};
+  
+  // No overflow check, I just want to read a 128-bytes file in 10-bytes chunks
+  int n = fread(buf, 1, sizeof(buf), f);
+  if (n > 0) fwrite(buf, n, 1, stdout);
+
+  vaselin::set_timeout(try_read, 0);
+}
+
 int main() {
   fprintf(stdout, "stdout\n");
   fprintf(stderr, "stderr\n");
 
-  auto f = fopen("poc.html", "rb");
+  f = fopen("poc.html", "rb");
   if (!f) {
     fprintf(stderr, "%s\n", strerror(errno));
   } else {
-    char buf[1024]{};
-    char *ptr = buf;
-    while (!feof(f)) {
-      // No overflow check, I just want to read a 128-bytes file in 10-bytes chunks
-      int n = fread(ptr, 1, 1, f);
-      printf("Got %d bytes", n);
-      ptr += n;
-    }
-    fclose(f);
-    printf("%s\n", buf);
+    vaselin::set_timeout(try_read, 0);
   }
 }
