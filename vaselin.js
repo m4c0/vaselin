@@ -11,18 +11,19 @@ function vaselin_tostr(ptr, size) {
   var open_files = [];
 
   function open_file(ptr, sz) {
-    const res = open_files.push({ total: 0 });
+    const res = open_files.push(null);
     fetch(vaselin_tostr(ptr, sz))
       .then(r => {
         const rdr = r.body.getReader();
-        var total = 0;
+        const buffer = new Uint8Array(r.headers.get('Content-Length'));
+        var acc = 0;
         rdr.read().then(function it({ done, value }) {
           if (done) {
-            console.log(res, total);
-            openfiles[res] = { total };
+            open_files[res] = buffer;
             return;
           }
-          total += value.length;
+          buffer.set(value, acc);
+          acc += value.length;
           return rdr.read().then(it);
         });
       });
