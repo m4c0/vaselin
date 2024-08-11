@@ -29,8 +29,15 @@ function vaselin_tostr(ptr, size) {
       });
     return res - 1;
   }
-  function read_block(fd, ptr, sz) {
-    return 1;
+  function read_block(fd, ofs, ptr, sz) {
+    const buf = open_files[fd];
+    if (!buf) return 0;
+
+    if (ofs + sz > buf.length) sz = buf.length - ofs;
+    if (sz == 0) return -1;
+
+    vaselin_toarr(ptr, sz).set(buf.subarray(ofs, sz));
+    return sz;
   }
 
   leco_imports.wasi_snapshot_preview1 = new Proxy({
