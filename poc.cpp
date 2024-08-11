@@ -18,7 +18,15 @@ int main() {
   if (!f) {
     fprintf(stderr, "%s\n", strerror(errno));
   } else {
-    fgetc(f);
+    char buf[1024]{};
+    char *ptr = buf;
+    while (!feof(f)) {
+      // No overflow check, I just want to read a 128-bytes file in 10-bytes chunks
+      int n = fread(ptr, 1, 1, f);
+      printf("Got %d bytes", n);
+      ptr += n;
+    }
     fclose(f);
+    printf("%s\n", buf);
   }
 }
