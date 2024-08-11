@@ -8,6 +8,30 @@ function vaselin_tostr(ptr, size) {
 (function() {
   function ifn(fn) { return leco_exports.__indirect_function_table.get(fn); }
 
+  var open_files = [];
+
+  function open_file(ptr, sz) {
+    const res = open_files.push({ total: 0 });
+    fetch(vaselin_tostr(ptr, sz))
+      .then(r => {
+        const rdr = r.body.getReader();
+        var total = 0;
+        rdr.read().then(function it({ done, c }) {
+          if (done) {
+            console.log(res, total);
+            openfiles[res] = { total };
+            return;
+          }
+          total += c.length;
+          return rdr.read().then(it);
+        });
+      });
+    return res;
+  }
+  function read_block(fd, ptr, sz) {
+    return 1;
+  }
+
   leco_imports.wasi_snapshot_preview1 = new Proxy({
     proc_exit : code => { throw `process exit with code ${code}` },
   }, {
@@ -22,9 +46,10 @@ function vaselin_tostr(ptr, size) {
     console_error : (ptr, size) => console.error(vaselin_tostr(ptr, size)),
     console_log : (ptr, size) => console.log(vaselin_tostr(ptr, size)),
     date_now : () => BigInt(Date.now()),
+    open_file,
     preopen_name_len : (idx) => idx >= vaselin_preopens.length ? 0 : vaselin_preopens[idx].length,
     preopen_name_copy : (idx, ptr, sz) => vaselin_toarr(ptr, sz).set(vaselin_preopens[idx]),
-    read_block : (fd, ptr, sz) => 1,
+    read_block,
     request_animation_frame : (fn) => window.requestAnimationFrame(ifn(fn)),
     set_timeout : (fn, timeout) => setTimeout(ifn(fn), timeout),
   };
