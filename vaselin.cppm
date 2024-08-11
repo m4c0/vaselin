@@ -86,6 +86,7 @@ VASI(fd_read)(int fd, const __wasi_iovec_t * iovs, size_t iovs_len, __wasi_size_
     auto len = iovs[i].buf_len;
     auto r = vaselin::read_block(fd, iovs[i].buf, len);
     *read += r;
+    if (r < 0 && !*read) *read = -1;
     if (r < len) return __WASI_ERRNO_SUCCESS;
   }
 
