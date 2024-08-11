@@ -11,7 +11,7 @@ function vaselin_tostr(ptr, size) {
   var open_files = [];
 
   function open_file(ptr, sz) {
-    const res = open_files.push(null);
+    const res = open_files.push(null) - 1;
     fetch(vaselin_tostr(ptr, sz))
       .then(r => {
         const rdr = r.body.getReader();
@@ -27,7 +27,7 @@ function vaselin_tostr(ptr, size) {
           return rdr.read().then(it);
         });
       });
-    return res - 1;
+    return res;
   }
   function read_block(fd, ofs, ptr, sz) {
     const buf = open_files[fd];
