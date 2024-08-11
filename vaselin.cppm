@@ -24,6 +24,8 @@ IMPORT(void, request_animation_frame)(void (*)());
 IMPORT(void, set_timeout)(void (*)(), int);
 } // namespace vaselin
 
+static constexpr const auto read_rights = __WASI_RIGHTS_FD_READ;
+
 static void err(jute::view msg) {
   vaselin::console_error(msg.begin(), msg.size());
 }
@@ -54,7 +56,10 @@ VASI(fd_fdstat_get)(int fd, __wasi_fdstat_t *stat) {
       stat->fs_rights_inheriting = __WASI_RIGHTS_FD_WRITE;
       return __WASI_ERRNO_SUCCESS;
     case 3: // "root dir" (prestat'd)
-      *stat = { .fs_filetype = __WASI_FILETYPE_DIRECTORY };
+      stat->fs_filetype = __WASI_FILETYPE_DIRECTORY;
+      stat->fs_flags = 0;
+      stat->fs_rights_base = __WASI_RIGHTS_FD_READ;
+      stat->fs_rights_inheriting = __WASI_RIGHTS_FD_READ;
       return __WASI_ERRNO_SUCCESS;
     default:
       err("fdstat_get: unknown FD");
@@ -118,7 +123,10 @@ VASI(fd_write)
   return __WASI_ERRNO_SUCCESS;
 }
 
-VASI(path_open)(int dir_fd, __wasi_lookupflags_t, const char * path, unsigned len, __wasi_oflags_t oflags, __wasi_rights_t base, __wasi_rights_t inh, __wasi_fdflags_t fdflags, int * ret) {
+VASI(path_open)(int dir_fd, __wasi_lookupflags_t, const char * path, unsigned len, __wasi_oflags_t, __wasi_rights_t base, __wasi_rights_t inh, __wasi_fdflags_t fdflags, int * ret) {
+  if (base != read_rights || inh != read_rights) return __WASI_ERRNO_ACCES;
+  if (fdflags != 0) return __WASI_ERRNO_ACCES;
+
   auto p = jute::view{path, len};
   err(p);
   return __WASI_ERRNO_ACCES;
