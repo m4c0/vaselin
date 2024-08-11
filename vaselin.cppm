@@ -14,6 +14,7 @@ import jute;
 #define VASI(N) extern "C" int __imported_wasi_snapshot_preview1_##N
 
 export namespace vaselin {
+  IMPORT(void, close_file)(int);
   IMPORT(void, console_error)(const char *, int);
   IMPORT(void, console_log)(const char *, int);
   IMPORT(__wasi_timestamp_t, date_now)();
@@ -38,6 +39,13 @@ static void err(jute::view msg) { vaselin::console_error(msg.begin(), msg.size()
 VASI(clock_time_get)(__wasi_clockid_t id, __wasi_timestamp_t precision, __wasi_timestamp_t * ret) {
   if (id != 0) return __WASI_ERRNO_ACCES;
   *ret = vaselin::date_now() * 1000000;
+  return __WASI_ERRNO_SUCCESS;
+}
+
+VASI(fd_close)(int fd) {
+  auto & jsf = open_fds[fd];
+  vaselin::close_file(jsf.js_fd);
+  jsf = {};
   return __WASI_ERRNO_SUCCESS;
 }
 

@@ -51,6 +51,7 @@ function vaselin_tostr(ptr, size) {
     },
   });
   leco_imports.vaselin = {
+    close_file : (fd) => open_files[fd] = null,
     console_error : (ptr, size) => console.error(vaselin_tostr(ptr, size)),
     console_log : (ptr, size) => console.log(vaselin_tostr(ptr, size)),
     date_now : () => BigInt(Date.now()),
