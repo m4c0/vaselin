@@ -22,8 +22,8 @@ export namespace vaselin {
   IMPORT(int, preopen_name_len)(int);
   IMPORT(int, preopen_name_copy)(int, uint8_t *, int);
   IMPORT(int, read_block)(int, int, void *, int);
-  IMPORT(void, request_animation_frame)(void (*)());
-  IMPORT(void, set_timeout)(void (*)(), int);
+  IMPORT(void, request_animation_frame)(void (*)(void *), void *);
+  IMPORT(void, set_timeout)(void (*)(void *), void *, int);
 } // namespace vaselin
 
 static constexpr const auto read_rights = __WASI_RIGHTS_FD_READ;
@@ -154,9 +154,9 @@ VASI(path_open)
 }
 
 int main();
-static void run_main() { main(); }
+static void run_main(void *) { main(); }
 namespace vaselin {
   struct init {
-    init() { set_timeout(run_main, 0); }
+    init() { set_timeout(run_main, nullptr, 0); }
   } i;
 } // namespace vaselin

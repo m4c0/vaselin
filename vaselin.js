@@ -6,7 +6,9 @@ function vaselin_tostr(ptr, size) {
 }
 
 (function() {
-  function ifn(fn) { return leco_exports.__indirect_function_table.get(fn); }
+  function ifn(fn, ptr) {
+    return () => leco_exports.__indirect_function_table.get(fn)(ptr);
+  }
 
   var open_files = [];
 
@@ -59,7 +61,7 @@ function vaselin_tostr(ptr, size) {
     preopen_name_len : (idx) => idx >= vaselin_preopens.length ? 0 : vaselin_preopens[idx].length,
     preopen_name_copy : (idx, ptr, sz) => vaselin_toarr(ptr, sz).set(vaselin_preopens[idx]),
     read_block,
-    request_animation_frame : (fn) => window.requestAnimationFrame(ifn(fn)),
-    set_timeout : (fn, timeout) => setTimeout(ifn(fn), timeout),
+    request_animation_frame : (fn, ptr) => window.requestAnimationFrame(ifn(fn, ptr)),
+    set_timeout : (fn, ptr, timeout) => setTimeout(ifn(fn, ptr), timeout),
   };
 })();

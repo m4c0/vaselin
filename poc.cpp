@@ -10,11 +10,11 @@
 
 import vaselin;
 
-static FILE * f;
-
 // Due to the event-driven nature of JS, we can't do a while loop for reading the file.
 // So we need to treat all IO as "async"
-void try_read() {
+void try_read(void * vf) {
+  FILE * f = static_cast<FILE *>(vf);
+
   // TODO: the final </html> is not being printed
   if (feof(f)) {
     fclose(f);
@@ -27,17 +27,17 @@ void try_read() {
   int n = fread(buf, 1, sizeof(buf), f);
   if (n > 0) fwrite(buf, n, 1, stdout);
 
-  vaselin::set_timeout(try_read, 0);
+  vaselin::set_timeout(try_read, f, 0);
 }
 
 int main() {
   fprintf(stdout, "stdout\n");
   fprintf(stderr, "stderr\n");
 
-  f = fopen("poc.html", "rb");
+  FILE * f = fopen("poc.html", "rb");
   if (!f) {
     fprintf(stderr, "%s\n", strerror(errno));
   } else {
-    vaselin::set_timeout(try_read, 0);
+    vaselin::set_timeout(try_read, f, 0);
   }
 }
