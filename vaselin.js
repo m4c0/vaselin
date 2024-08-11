@@ -16,17 +16,17 @@ function vaselin_tostr(ptr, size) {
       .then(r => {
         const rdr = r.body.getReader();
         var total = 0;
-        rdr.read().then(function it({ done, c }) {
+        rdr.read().then(function it({ done, value }) {
           if (done) {
             console.log(res, total);
             openfiles[res] = { total };
             return;
           }
-          total += c.length;
+          total += value.length;
           return rdr.read().then(it);
         });
       });
-    return res;
+    return res - 1;
   }
   function read_block(fd, ptr, sz) {
     return 1;

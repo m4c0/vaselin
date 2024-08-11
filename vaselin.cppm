@@ -17,6 +17,7 @@ export namespace vaselin {
   IMPORT(void, console_error)(const char *, int);
   IMPORT(void, console_log)(const char *, int);
   IMPORT(__wasi_timestamp_t, date_now)();
+  IMPORT(int, open_file)(const char *, int);
   IMPORT(int, preopen_name_len)(int);
   IMPORT(int, preopen_name_copy)(int, uint8_t *, int);
   IMPORT(int, read_block)(int, void *, int);
@@ -123,7 +124,7 @@ VASI(path_open)
   if (fdflags != 0) return __WASI_ERRNO_ACCES;
 
   *ret = open_fds.size() + 4;
-  open_fds.push_back(0);
+  open_fds.push_back(vaselin::open_file(path, len));
   return __WASI_ERRNO_SUCCESS;
 }
 
