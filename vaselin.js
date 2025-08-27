@@ -60,7 +60,7 @@ function vaselin_tostr(ptr, size) {
     open_file,
     preopen_name_len : (idx) => idx >= vaselin_preopens.length ? 0 : vaselin_preopens[idx].length,
     preopen_name_copy : (idx, ptr, sz) => vaselin_toarr(ptr, sz).set(vaselin_preopens[idx]),
-    raise_error : () => { throw "wanna-be exception raised") },
+    raise_error : () => { throw "wanna-be exception raised" },
     read_block,
     request_animation_frame : (fn, ptr) => window.requestAnimationFrame(ifn(fn, ptr)),
     set_timeout : (fn, ptr, timeout) => setTimeout(ifn(fn, ptr), timeout),
