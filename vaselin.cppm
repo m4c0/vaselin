@@ -22,6 +22,7 @@ export namespace vaselin {
   IMPORT(int, preopen_name_len)(int);
   IMPORT(int, preopen_name_copy)(int, uint8_t *, int);
   IMPORT(int, read_block)(int, int, void *, int);
+  IMPORT(void, raise_error)();
   IMPORT(void, request_animation_frame)(void (*)(void *), void *);
   IMPORT(void, set_timeout)(void (*)(void *), void *, int);
 } // namespace vaselin
