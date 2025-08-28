@@ -22,9 +22,10 @@ export namespace vaselin {
   IMPORT(int, preopen_name_len)(int);
   IMPORT(int, preopen_name_copy)(int, uint8_t *, int);
   IMPORT(int, read_block)(int, int, void *, int);
-  IMPORT(void, raise_error)();
   IMPORT(void, request_animation_frame)(void (*)(void *), void *);
   IMPORT(void, set_timeout)(void (*)(void *), void *, int);
+
+  extern "C" [[noreturn]] [[clang::import_module("vaselin"), clang::import_name("raise_error")]] void raise_error();
 } // namespace vaselin
 
 static constexpr const auto read_rights = __WASI_RIGHTS_FD_READ;
