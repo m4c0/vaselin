@@ -1,8 +1,8 @@
+module;
 #ifndef LECO_TARGET_WASM
 #error This only makes sense on WASM
 #endif
 
-module;
 #include <wasi/api.h>
 
 export module vaselin;
@@ -155,7 +155,7 @@ VASI(path_open)
   return __WASI_ERRNO_SUCCESS;
 }
 
-int main();
+extern "C++" int main();
 static void run_main(void *) { main(); }
 namespace vaselin {
   struct init {
