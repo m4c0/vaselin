@@ -18,7 +18,7 @@ void try_read(void * vf) {
   // TODO: the final </html> is not being printed
   if (feof(f)) {
     fclose(f);
-    return;
+    throw 0;
   }
 
   char buf[10]{};
@@ -30,7 +30,7 @@ void try_read(void * vf) {
   vaselin::set_timeout(try_read, f, 0);
 }
 
-int main() {
+int main() try {
   fprintf(stdout, "stdout\n");
   fprintf(stderr, "stderr\n");
 
@@ -40,4 +40,7 @@ int main() {
   } else {
     vaselin::set_timeout(try_read, f, 0);
   }
+} catch (...) {
+  // Eventually this should be possible
+  vaselin::console_log("ok", 2);
 }
