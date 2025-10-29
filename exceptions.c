@@ -7,8 +7,11 @@ void vaselin_console_error(const char * msg, int sz);
   abort();
 }
 
-// Stubbing these until exceptions are properly supported
+// Stubbing these until exceptions are properly supported in WASI
 unsigned __cxa_allocate_exception(unsigned a) { fail(); }
+void __cxa_free_exception(unsigned a) { fail(); }
 void __cxa_throw(unsigned a, unsigned b, unsigned c) { fail(); }
 unsigned __cxa_begin_catch(unsigned a) { fail(); }
 void __cxa_end_catch() { fail(); }
+void * __wasm_lpad_context = 0;
+unsigned _Unwind_CallPersonality(unsigned a) { fail(); }

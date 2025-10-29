@@ -40,6 +40,9 @@ int main() try {
   } else {
     vaselin::set_timeout(try_read, f, 0);
   }
+} catch (int x) {
+  // This requires even more symbols
+  throw x + 1;
 } catch (...) {
   // Eventually this should be possible
   vaselin::console_log("ok", 2);
