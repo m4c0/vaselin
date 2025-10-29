@@ -156,7 +156,7 @@ VASI(path_open)
   return __WASI_ERRNO_SUCCESS;
 }
 
-extern "C++" int main();
+int main();
 static void run_main(void *) { main(); }
 namespace vaselin {
   struct init {
