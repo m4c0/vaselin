@@ -2,7 +2,7 @@ module;
 #ifndef LECO_TARGET_WASM
 #error This only makes sense on WASM
 #endif
-#pragma leco add_impl exceptions
+#pragma leco add_impl exceptions threads
 
 #include <wasi/api.h>
 
